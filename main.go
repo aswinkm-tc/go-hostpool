@@ -61,7 +61,7 @@ func (hp *hostpool) update(host string, reward float64) {
 
 func (hp *hostpool) selectHost() string {
 	var selected string
-	minScore := -1.0 // Initialize to a large number
+	minScore := -1.0
 
 	for _, addr := range hp.Addrs {
 		dist := distuv.Beta{Alpha: hp.alpha[addr], Beta: hp.beta[addr]}
