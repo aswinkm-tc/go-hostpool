@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"time"
@@ -23,11 +24,17 @@ func (hp *hostpool) Do(req *http.Request) (*http.Response, error) {
 	counter[host]++
 	req.URL.Host = host
 	req.URL.Scheme = "http"
-	
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 
-	reward := 1.0 - float64(time.Since(start).Milliseconds())/1000.0 // Reward based on response time
+	var reward float64
+	if resp.StatusCode == http.StatusOK {
+		reward = 1.0 - float64(time.Since(start).Milliseconds())/1000.0
+		reward = math.Max(0, math.Min(1, reward)) // Clamp reward between 0 and 1
+	} else {
+		reward = 0.0 // No reward for non-OK responses
+	}
 	hp.update(host, reward)
 	return resp, err
 }
